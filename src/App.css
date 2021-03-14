@@ -1,0 +1,9 @@
+.tagLable {
+  cursor: pointer;
+  color: blue;
+}
+
+.iconImg {
+  max-width: 720px;
+  max-height: 660px;
+}
