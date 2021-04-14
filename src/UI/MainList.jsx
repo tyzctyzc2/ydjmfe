@@ -2,7 +2,7 @@ import textIcon from '../text.png';
 import binaryIcon from '../binary.png';
 import '../App.css';
 import React, { Component } from 'react';
-
+import '../config';
 
 let currentPage = 0;
 let inLoading = false;
@@ -20,7 +20,7 @@ export default class MainList extends React.Component{
   // get data when load
   componentDidMount(){
       document.title = 'POST'
-      fetch("http://192.168.0.100:8080/ydjm/api/post/list?page=0")
+      fetch(global.constants.website + "api/post/list?page=0")
       .then(res => res.json())
       .then(data => {
         console.log(data);
@@ -53,7 +53,7 @@ export default class MainList extends React.Component{
     }
     inLoading = true;
     let tryPage = currentPage + 1;
-    let url = "http://192.168.0.100:8080/ydjm/api/post/list?page=" + tryPage;
+    let url = global.constants.website + "api/post/list?page=" + tryPage;
     console.log(url);
     fetch(url)
       .then(res => res.json())
@@ -79,7 +79,7 @@ export default class MainList extends React.Component{
     switch(file.fileType) {
       case 'png':
       case 'jpg':
-        return ".\\" + file.filePath + "\\" + file.fileName;
+        return ".\\ydjm\\" + file.filePath + "\\" + file.fileName;
       case 'txt':
         return textIcon;
       default:

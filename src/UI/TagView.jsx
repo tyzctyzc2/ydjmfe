@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from "react-router-dom";
+import '../config';
 
 class TagView extends Component {
     constructor(props){
@@ -10,7 +11,7 @@ class TagView extends Component {
     }
     componentDidMount(){
         document.title = 'TAG'
-        fetch("http://192.168.0.100:8080/ydjm/api/tag/list")
+        fetch(global.constants.website + "api/tag/list")
         .then(res => res.json())
         .then(data => {
             console.log(data);
