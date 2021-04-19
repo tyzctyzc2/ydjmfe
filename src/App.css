@@ -43,13 +43,9 @@ li a:hover {
   margin-right: 10%;
 }
 
-
-
 button{ 
   margin-right: 10px;
 }
-
-
 
 .vertical-center-modal {
   text-align: center;
@@ -69,4 +65,8 @@ button{
   vertical-align: middle;
   top: 0;
   text-align: left;
+}
+
+.oneLine {
+  display: inline-block;
 }
