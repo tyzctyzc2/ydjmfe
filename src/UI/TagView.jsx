@@ -1,8 +1,10 @@
+import { Modal, Button } from 'antd';
 import React, { Component } from 'react';
+import '../App.css';
 import { Link } from "react-router-dom";
 import '../config';
-import textIcon from '../text.png';
-import binaryIcon from '../binary.png';
+import {renderIconImage} from '../data/api'
+import {handleZoom} from '../data/api'
 
 let inLoading = false;
 class TagView extends Component {
@@ -12,7 +14,9 @@ class TagView extends Component {
             tags: [''],
             pickedTag:'',
             loadedPost:[],
-            myPageNo:0
+            myPageNo:0,
+            isModalVisible:false,
+            curImg: null
         }
     }
     componentDidMount(){
@@ -92,17 +96,6 @@ class TagView extends Component {
           })
         this.loadPickedData(tag)
     }
-    renderIconImage(file) {
-        switch(file.fileType) {
-          case 'png':
-          case 'jpg':
-            return ".\\ydjm\\" + file.filePath + "\\" + file.fileName;
-          case 'txt':
-            return textIcon;
-          default:
-            return binaryIcon; 
-        }
-      }
     render() {
         return (
             <div>
@@ -142,10 +135,19 @@ class TagView extends Component {
                                 {
                                 element.files && element.files.map((file, ii) =>{
                                     return(
-                                    <div key = {ii}>
+                                    <div key = {ii} className="fullLine">
                                         {
-                                        file.fileName ? 
-                                        <img className = "iconImg" src={this.renderIconImage(file)}/>: ''
+                                          file.fileType == 'jpg' ?
+                                          <img  className = "iconImg" 
+                                                src={renderIconImage(file)}
+                                                onClick={()=>{this.setState({isModalVisible:true, curImg:file})}}
+                                          />: ''
+                                        }
+                                        {
+                                          file.fileType == 'mov' ?
+                                          <video id="video"  width="640" height="480" muted controls autoPlay="autoPlay" preload="auto" loop="loop" >
+                                            <source src={renderIconImage(file)} />
+                                          </video>: ''
                                         }
                                     </div>
                                     )
@@ -158,6 +160,20 @@ class TagView extends Component {
                     }
                     
                 </div>
+                <Modal  fullScreen title="ZOOM" visible={this.state.isModalVisible}
+                onCancel={()=>{this.setState({
+                    isModalVisible:false
+                })}}
+                footer={[
+                   
+                  ]}
+                >
+                  <div onWheel={handleZoom}>
+                    <img  className = "iconImg" 
+                          src={renderIconImage(this.state.curImg)}
+                    />
+                  </div>
+                </Modal>
             </div>
         );
     }

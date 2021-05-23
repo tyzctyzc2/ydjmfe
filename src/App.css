@@ -71,6 +71,10 @@ button{
   display: inline-block;
 }
 
+.oneLine2 {
+  display: flex;
+}
+
 .fullLine {
   display: contents;
 }

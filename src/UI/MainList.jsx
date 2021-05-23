@@ -1,9 +1,9 @@
-import textIcon from '../text.png';
-import binaryIcon from '../binary.png';
 import { Modal, Button } from 'antd';
 import '../App.css';
 import React, { Component } from 'react';
 import '../config';
+import {renderIconImage} from '../data/api'
+import {handleZoom} from '../data/api'
 
 let currentPage = 0;
 let inLoading = false;
@@ -16,22 +16,37 @@ export default class MainList extends React.Component{
       this.state = {
           banners: [''],
           isModalVisible:false,
-          curImg: null
+          curImg: null,
+          searchText: ''
       }
   }
 
   // get data when load
   componentDidMount(){
       document.title = 'POST'
-      fetch(global.constants.website + "api/post/list?page=0")
+      this.loadFirstPageData()
+      document.addEventListener('scroll', this.trackScrolling);
+  }
+
+  loadFirstPageData() {
+    currentPage = 0
+
+    fetch(this.getCurrentUrl())
       .then(res => res.json())
       .then(data => {
         console.log(data);
           this.setState({
               banners:data
           })
-      })
-      document.addEventListener('scroll', this.trackScrolling);
+    })
+  }
+
+  getCurrentUrl() {
+    if (this.state.searchText.length > 0) {
+      return global.constants.website + "api/post/list/find?page=" + currentPage + "&keyword=" + this.state.searchText
+    } else {
+      return global.constants.website + "api/post/list?page=" + currentPage
+    }
   }
 
   isBottom(el) {
@@ -78,42 +93,48 @@ export default class MainList extends React.Component{
     console.log(tagName);
   }
 
-  renderIconImage(file) {
-    if (file == undefined) {
-      return textIcon;
+  searchTextChange(val) {
+    this.setState({
+      searchText:val.target.value
+    })
+  }
+
+  doSearch() {
+    console.log(this.state.searchText)
+    if (this.state.searchText.length ==0) {
+      return
     }
-    switch(file.fileType) {
-      case 'png':
-      case 'jpg':
-      case 'mov':
-        //return "http://localhost:8080\\ydjm\\" + file.filePath + "\\" + file.fileName;
-        return ".\\ydjm\\" + file.filePath + "\\" + file.fileName;
-      case 'txt':
-        return textIcon;
-      default:
-        return binaryIcon; 
+    this.loadFirstPageData()
+  }
+
+  searchBoxKeyDown() {
+    if(window.event.keyCode === 13){
+      this.doSearch()
     }
   }
 
-  handleZoom = (e) => {
-    console.log(e)
-    let { clientHeight, clientWidth, style } = e.target
-    let ratio = clientHeight / clientWidth
-    console.log("ratio===" + ratio)
-    console.log("clientHeight===" + clientHeight)
-    console.log("clientWidth===" + clientWidth)
-    if (e.nativeEvent.deltaY <= 0 && clientWidth < 1000) {
-        style.transform = "scale(2.5)"
-    } else if (e.nativeEvent.deltaY > 0) {
-        style.transform = "scale(1)"
-    }
+  showAllPost() {
+    console.log('cancle search')
+    this.setState({
+      searchText:''
+    })
+    currentPage = 0
+    this.setState({searchText:''}, ()=> {
+      this.loadFirstPageData()
+     });
   }
 
   render(){
       return(
         <div>
           <div id="list_root">
-            <h1>{currentSelection}</h1>
+            <div className="oneLine2">
+              <input className="inputBox oneLine" type="text" value={this.state.searchText} 
+              onKeyDown={this.searchBoxKeyDown.bind(this)}
+              onChange={this.searchTextChange.bind(this)}/>
+              <button className="bigButton rightDockButton" onClick={this.doSearch.bind(this)} >Search</button>
+            </div>
+            <h1 onClick={() => this.showAllPost()}>{currentSelection}</h1>
               {
                 this.state.banners.map((element,index) =>{
                   return(
@@ -141,15 +162,19 @@ export default class MainList extends React.Component{
                                 {
                                   file.fileType == 'jpg' ?
                                   <img  className = "iconImg" 
-                                        src={this.renderIconImage(file)}
+                                        src={renderIconImage(file)}
                                         onClick={()=>{this.setState({isModalVisible:true, curImg:file})}}
                                   />: ''
                                 }
                                 {
                                   file.fileType == 'mov' ?
-                                  <video id="video"  width="640" height="480" muted controls autoplay="autoplay" preload="auto" >
-                                    <source src={this.renderIconImage(file)} />
+                                  <video id="video"  width="640" height="480" muted controls autoPlay="autoPlay" preload="auto" loop="loop" >
+                                    <source src={renderIconImage(file)} />
                                   </video>: ''
+                                }
+                                {
+                                  file.fileType == 'pdf' ?
+                                  <embed src={renderIconImage(file)} type="application/pdf" width="80%" height="700" />:''
                                 }
                               </div>
                             )
@@ -162,7 +187,7 @@ export default class MainList extends React.Component{
               }
             
           </div>
-          <Modal  fullScreen title="TAG" visible={this.state.isModalVisible}
+          <Modal  fullScreen title="ZOOM" visible={this.state.isModalVisible}
                 onCancel={()=>{this.setState({
                     isModalVisible:false
                 })}}
@@ -170,9 +195,9 @@ export default class MainList extends React.Component{
                    
                   ]}
                 >
-                  <div onWheel={this.handleZoom}>
+                  <div onWheel={handleZoom}>
                     <img  className = "iconImg" 
-                          src={this.renderIconImage(this.state.curImg)}
+                          src={renderIconImage(this.state.curImg)}
                     />
                   </div>
                 </Modal>
